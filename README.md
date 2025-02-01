@@ -1,2 +1,6 @@
 # test_project_01
-test again
+
+# requirements.txt
+- pip install -r requirements.txt
+
+`streamlit run main.py`
