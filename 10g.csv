@@ -1,0 +1,11 @@
+﻿elements,Yang-Wood,Yin-Wood,Yang-Fire,Yin-Fire,Yang-Earth,Yin-Earth,Yang-Metal,Yin-Metal,Yang-Water,Yin-Water
+Yang-Wood,Friend,Robbery,Indirect Resource,Direct Resource,Seven Killings,Direct Officer,Indirect Wealth,Direct Wealth,Eating God,Hurting Officer
+Yin-Wood,Robbery,Friend,Direct Resource,Indirect Resource,Direct Officer,Seven Killings,Direct Wealth,Indirect Wealth,Hurting Officer,Eating God
+Yang-Fire,Eating God,Hurting Officer,Friend,Robbery,Indirect Resource,Direct Resource,Seven Killings,Direct Officer,Indirect Wealth,Direct Wealth
+Yin-Fire,Hurting Officer,Eating God,Robbery,Friend,Direct Resource,Indirect Resource,Direct Officer,Seven Killings,Direct Wealth,Indirect Wealth
+Yang-Earth,Indirect Wealth,Direct Wealth,Eating God,Hurting Officer,Friend,Robbery,Indirect Resource,Direct Resource,Seven Killings,Direct Officer
+Yin-Earth,Direct Wealth,Indirect Wealth,Hurting Officer,Eating God,Robbery,Friend,Direct Resource,Indirect Resource,Direct Officer,Seven Killings
+Yang-Metal,Seven Killings,Direct Officer,Indirect Wealth,Direct Wealth,Eating God,Hurting Officer,Friend,Robbery,Indirect Resource,Direct Resource
+Yin-Metal,Direct Officer,Seven Killings,Direct Wealth,Indirect Wealth,Hurting Officer,Eating God,Robbery,Friend,Direct Resource,Indirect Resource
+Yang-Water,Indirect Resource,Direct Resource,Seven Killings,Direct Officer,Indirect Wealth,Direct Wealth,Eating God,Hurting Officer,Friend,Robbery
+Yin-Water,Direct Resource,Indirect Resource,Direct Officer,Seven Killings,Direct Wealth,Indirect Wealth,Hurting Officer,Eating God,Robbery,Friend
