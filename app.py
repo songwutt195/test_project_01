@@ -1,94 +1,88 @@
 import streamlit as st
-from datetime import datetime, timedelta
-# from lunarcalendar import Converter, Solar, Lunar
 import pandas as pd
+from datetime import datetime, timedelta
 
 utc_now = datetime.utcnow()
-thai_time = utc_now + timedelta(hours=7)
-min_date = utc_now - timedelta(days=3650)
+this_time = utc_now + timedelta(hours=7)
 
-# Elements and Animals for Heavenly Stems and Earthly Branches
-heavenly_stems_elements = ["Yang-Wood", "Yin-Wood", "Yang-Fire", "Yin-Fire", "Yang-Earth", "Yin-Earth", "Yang-Metal", "Yin-Metal", "Yang-Water", "Yin-Water"]
-earthly_branches_animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"]
+if 'calendar' not in st.session_state:
+    st.session_state.calendar = pd.read_csv('calendar.csv').set_index(['day','month','year'])
+    
+df_calendar = st.session_state.calendar
 
-# Function to calculate the Heavenly Stem and Earthly Branch for a given year
-def calculate_year_pillar(year):
-    stem_index = (year - 4) % 10
-    branch_index = (year - 4) % 12
-    return heavenly_stems_elements[stem_index], earthly_branches_animals[branch_index]
+if 'relationships' not in st.session_state:
+    df_10_gods = pd.read_csv('10g.csv').set_index('elements')
+    relationships = {}
+    for col in df_10_gods.columns:
+        for ind in df_10_gods.index:
+            relationships[(col, ind)] = df_10_gods.loc[ind, col]
+    st.session_state.relationships = relationships
 
-# Function to calculate the Heavenly Stem and Earthly Branch for a given month
-def calculate_month_pillar(year, month):
-    # Simplified approach (may not be accurate for all cases)
-    stem_index = (year * 12 + month + 2) % 10
-    branch_index = (month) % 12
-    return heavenly_stems_elements[stem_index], earthly_branches_animals[branch_index]
+relationships = st.session_state.relationships
 
-# Function to calculate the Heavenly Stem and Earthly Branch for a given day
-def calculate_day_pillar(year, month, day):
-    # Convert Gregorian date to Julian Day Number (JDN)
-    a = (14 - month) // 12
-    y = year + 4800 - a
-    m = month + 12 * a - 3
-    jdn = day + (153 * m + 2) // 5 + y * 365 + y // 4 - y // 100 + y // 400 - 32045
+date_dict = {'甲': 'Yang-Wood',
+ '乙': 'Yin-Wood',
+ '丙': 'Yang-Fire',
+ '丁': 'Yin-Fire',
+ '戊': 'Yang-Earth',
+ '己': 'Yin-Earth',
+ '庚': 'Yang-Metal',
+ '辛': 'Yin-Metal',
+ '壬': 'Yang-Water',
+ '癸': 'Yin-Water'}
 
-    # Calculate the stem and branch for the day
-    stem_index = (jdn + 9) % 10
-    branch_index = (jdn + 1) % 12
-    return heavenly_stems_elements[stem_index], earthly_branches_animals[branch_index]
+zodiac_dict = {'子': 'Rat Yang-Water',
+ '丑': 'Ox Yin-Earth',
+ '寅': 'Tiger Yang-Wood',
+ '卯': 'Rabbit Yin-Wood',
+ '辰': 'Dragon Yang-Earth',
+ '巳': 'Snake Yin-Fire',
+ '午': 'Horse Yang-Fire',
+ '未': 'Goat Yin-Earth',
+ '申': 'Monkey Yang-Metal',
+ '酉': 'Rooster Yin-Metal',
+ '戌': 'Dog Yang-Earth',
+ '亥': 'Pig Yin-Water'}
 
-# Function to calculate the Heavenly Stem and Earthly Branch for a given hour
-def calculate_hour_pillar(day_stem, hour):
-    # Each day is divided into 12 two-hour periods, each associated with an Earthly Branch
-    branch_index = (hour + 1) // 2 % 12
-    # The stem of the hour pillar depends on the stem of the day pillar
-    stem_index = (day_stem * 2 + branch_index) % 10
-    return heavenly_stems_elements[stem_index], earthly_branches_animals[branch_index]
+def find_bazi(by_val, bm_val, bd_val):
+    return df_calendar.loc[(bd_val,bm_val,by_val)]
 
-# Main function to calculate Bazi
-def calculate_bazi(year, month, day, hour):
-    # Calculate the pillars
-    year_stem, year_branch = calculate_year_pillar(year)
-    month_stem, month_branch = calculate_month_pillar(year, month)
-    day_stem, day_branch = calculate_day_pillar(year, month, day)
-    hour_stem, hour_branch = calculate_hour_pillar(heavenly_stems_elements.index(day_stem), hour)
-    # hour_stem, hour_branch = calculate_hour_pillar(heavenly_stems.index(day_stem), hour)
-
-    # Return the Bazi as a dictionary
-    bazi_element_animal = {
-        "Hour": [hour_stem, hour_branch],
-        "Day": [day_stem, day_branch],
-        "Month": [month_stem, month_branch],
-        "Year": [year_stem, year_branch],
-    }
-
-    return bazi_element_animal
+def transfrom_bazi(bazi_series):
+    result_key = {'Day':'zd_d', 'Month':'zd_m', 'Year':'zd_y'}
+    result_dic = {}
+    for key in result_key:
+        teamp_result = bazi_series[result_key[key]]
+        result_dic[key] = [date_dict[teamp_result[0]]]+zodiac_dict[teamp_result[1]].split()
+    return pd.DataFrame(result_dic, index=['Stems Elements', 'Zodiac', 'Branches Elements'])
 
 st.title('BaZi Teller')
-st.header('BAZI Birth Chart')
+st.header('BaZi Birth Chart')
 
-inf1, inf2, inf3, inf4 = st.columns(4, vertical_alignment="center")
+inf1, inf2, inf3 = st.columns(3, vertical_alignment="center")
 
 with inf1:
   by_val = st.number_input("Pls tell Your Birthyear", 
-                           value=thai_time.year, 
-                           min_value=thai_time.year-100, 
-                           max_value=thai_time.year)
+                           value=this_time.year+543, 
+                           min_value=this_time.year+443, 
+                           max_value=this_time.year+543)
 with inf2:
   bm_val = st.number_input("Pls tell Your Birthmonth", 
-                           value=thai_time.month, 
+                           value=this_time.month, 
                            min_value=1, 
                            max_value=12)
 with inf3:
   bd_val = st.number_input("Pls tell Your Birthday", 
-                           value=thai_time.day, 
+                           value=this_time.day, 
                            min_value=1, 
                            max_value=31)
-with inf4:
-  bt_val = st.time_input("Pls tell Your Birthtime:", value=thai_time.time())
 
 if st.button("Calculate"):
-    bazi_dict = calculate_bazi(by_val, bm_val, bd_val, bt_val.hour)
-    bazi_tabel = pd.DataFrame(bazi_dict, index=['element', 'animal'])
-    st.write('Your Birthdatetime: ',datetime(by_val, bm_val, bd_val).strftime("%d %B %Y"),bt_val.strftime("%H:%M"))
-    st.write(bazi_tabel)
+    try:
+        bazi_result = find_bazi(by_val, bm_val, bd_val)
+        bazi_tabel = transfrom_bazi(bazi_result)
+        st.write('Your Birthdatetime: ',datetime(by_val, bm_val, bd_val).strftime("%d %B %Y"))
+        st.write(bazi_tabel)
+
+        
+    except:
+        st.write("Please Check Birthdate again!")
